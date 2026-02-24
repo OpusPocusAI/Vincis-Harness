@@ -1,92 +1,43 @@
 ![Version](https://img.shields.io/badge/version-4.4-blue)
 ![License](https://img.shields.io/badge/license-Custom%20(Free%20Use)-green)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-blueviolet)
-![Sprints](https://img.shields.io/badge/battle--tested-19%2B%20sprints-orange)
 
 # Vinci's CC-Harness
 
-**Turn Claude Code into a coordinated multi-agent development team.**
+Multi-terminal coordination for Claude Code. You open several terminals, assign each one a role, and they coordinate through markdown files. No plugins, no server, no infrastructure — just files that Claude Code reads on startup.
 
-Vinci's CC-Harness is a free-to-use framework that gives Claude Code structured roles, persistent memory, inter-session messaging, and sprint lifecycle management. Open multiple terminals, assign roles, and watch them coordinate through markdown files — no custom infrastructure needed.
-
-> *"Like having a development team that never forgets, never miscommunicates, and improves its own process every sprint."*
+<p align="center">
+  <img src="docs/assets/terminal-layout.png" alt="Four terminals running different harness roles" width="720" />
+  <br />
+  <em>A typical sprint layout — Coordinator, two Workers, and an Auditor each in their own terminal.</em>
+</p>
 
 ---
 
 ## How It Works
 
-```
-You open terminals.    You assign roles.    They coordinate through files.
-      |                      |                        |
-      v                      v                        v
-  Terminal 1            "You are the              CLAUDE.md (rules)
-  Terminal 2             Coordinator."             .sprint/inbox/ (messages)
-  Terminal 3            "Read SESSION-             memory/ (knowledge)
-  Terminal 4             PROMPT-A.md"              .sprint/sprint-N/ (artifacts)
-```
+A sprint goes like this:
 
-### The Role System
+1. You open a Claude Code terminal and tell it "You are the Coordinator."
+2. The Coordinator reads `CLAUDE.md`, then plans the sprint — what gets built, who does what.
+3. The Coordinator writes a SESSION-PROMPT for each worker. These are self-contained markdown files with the task, context, and rules.
+4. You open new terminals (one per worker) and paste "Read SESSION-PROMPT-A.md".
+5. Each worker runs in its own git worktree — isolated branch, no conflicts.
+6. Workers implement, commit, and write a short report when done.
+7. The Coordinator merges each worker branch back to main, one at a time.
+8. Optionally, an Auditor reviews what happened and writes a retro.
+9. Learnings get saved to memory files so the next sprint starts smarter.
 
-```
-                    +-----------------+
-                    |   COORDINATOR   |
-                    |  Plans sprints  |
-                    |  Writes prompts |
-                    |  Merges work    |
-                    +--------+--------+
-                             |
-              +--------------+--------------+
-              |              |              |
-     +--------v---+  +------v-----+  +-----v------+
-     |  WORKER A  |  |  WORKER B  |  |  WORKER C  |
-     |  Feature X |  |  Feature Y |  |  Bug fixes |
-     |  Branch A  |  |  Branch B  |  |  Branch C  |
-     +------------+  +------------+  +------------+
-              |              |              |
-              +--------------+--------------+
-                             |
-                    +--------v--------+
-                    |    AUDITOR      |
-                    | Inspects quality|
-                    | Improves process|
-                    +-----------------+
+All coordination happens through files in `.sprint/` and `memory/`. No shared context windows, no API calls between terminals.
 
-     +----------------+
-     |   ASSISTANT    |
-     | Deploys, pushes|
-     | Answers queries|
-     +----------------+
-```
+### Roles
 
-| Role | What It Does | When to Use |
-|------|-------------|-------------|
-| **Coordinator** | Plans sprints, writes worker prompts, merges branches, tracks progress | Every sprint — this is the orchestrator |
-| **Worker** | Implements code changes in isolated git worktrees | 1-5 per sprint, each on a separate branch |
-| **Auditor** | Inspects process quality, writes retrospectives, improves the harness | After sprints, or when process needs attention |
-| **Assistant** | Pushes to repos, runs builds, answers questions, handles deployments | On-demand for operational tasks |
-
----
-
-## Results
-
-This harness was developed over 19 production sprints on a real product. Here's what it achieved:
-
-| Metric | Before Harness | After 19 Sprints |
-|--------|---------------|-----------------|
-| Branch compliance | 0% (all workers on main) | **100%** (5 consecutive sprints) |
-| Process compliance | ~20% (instructions ignored) | **~90%** (4 consecutive sprints) |
-| Worker delivery rate | ~60% (partial deliveries) | **100%** (3 consecutive sprints) |
-| Context blowout incidents | Regular | **Zero** (4 consecutive sprints) |
-| Sprint grade (4 principles) | Mixed B/C | **All A/A-** (first achieved Sprint 19) |
-
-### The 4 Core Principles
-
-Every sprint is graded on these principles (ordered by priority):
-
-1. **Productivity** — More output in less time
-2. **Efficiency** — No repeating yourself; the system remembers
-3. **Accuracy** — Cross-checking between AIs approaches 100% correctness
-4. **Token Efficiency** — Among accurate approaches, choose the most elegant
+| Role | What it does | How many |
+|------|-------------|----------|
+| **Coordinator** | Plans the sprint, writes worker prompts, merges branches | 1 |
+| **Worker** | Implements code in an isolated git worktree | 1–5 |
+| **Auditor** | Reviews quality, writes retros, improves the harness | 1 (optional) |
+| **Assistant** | Deploys, runs builds, answers questions | 1 (on-demand) |
 
 ---
 
@@ -95,74 +46,49 @@ Every sprint is graded on these principles (ordered by priority):
 ### 1. Install
 
 ```bash
-# Clone the harness repo
 git clone https://github.com/OpusPocusAI/Vincis-Harness.git
-
-# Copy harness files into your project
 cp -r Vincis-Harness/harness/* your-project/
 ```
 
-> **Coming soon**: `npx vincis-harness init` — interactive setup with project-specific configuration.
-
 ### 2. Configure
 
-Edit `CLAUDE.md` in your project root with your project's details:
-- Service architecture (ports, entry points, start commands)
-- Deployment commands
-- Code conventions
-- Key directories
+Edit `CLAUDE.md` in your project root. Add your services, ports, deploy commands, and code conventions. Claude Code reads this file automatically on every session start.
 
-The harness reads `CLAUDE.md` automatically on every Claude Code session start.
-
-### 3. Run Your First Sprint
+### 3. Run a sprint
 
 ```bash
-# Terminal 1: Open Claude Code
+# Terminal 1 — Coordinator
 claude
-
 # Paste: "You are the Coordinator. Read CLAUDE.md."
-# The Coordinator will plan a sprint and create worker prompts.
 
-# Terminal 2: Open another Claude Code session
+# Terminal 2 — Worker A
 claude
-
 # Paste: "Read .sprint/sprint-1/SESSION-PROMPT-A.md"
-# Worker A starts implementing.
 
-# Terminal 3 (optional): Another worker
+# Terminal 3 — Worker B (optional)
 claude
 # Paste: "Read .sprint/sprint-1/SESSION-PROMPT-B.md"
 ```
 
-See [Your First Sprint Tutorial](docs/tutorials/01-your-first-sprint.md) for a detailed walkthrough.
+See the [Your First Sprint tutorial](docs/tutorials/01-your-first-sprint.md) for a full walkthrough.
 
 ---
 
-## Features
+## What makes it work
 
-### Roles & Terminals
-Four specialized roles with defined boundaries. Each runs in its own Claude Code terminal. Role docs define exactly what each role can and cannot do.
+**Memory that persists.** The `memory/` folder holds topic files (payments, design, auth, whatever your project needs) and a decision register. Every user decision gets saved. Next sprint, the Coordinator and workers already know what was decided.
 
-### Sprint Lifecycle
-Plan → Execute → Merge → Audit. The Coordinator plans work, creates worker prompts, workers implement in git worktrees, the Coordinator merges, the Auditor reviews. Every step has templates and checklists.
+**Inbox for async messaging.** Roles talk to each other through `.sprint/inbox/` files. The Coordinator can leave notes for the Auditor. Workers can flag blockers. It's not real-time — it's a simple text-based mailbox that survives context clears.
 
-### Persistent Memory
-Knowledge survives across sessions via `memory/` files. Topic-based organization (payments, design, search, auth). Decision register ensures no user choice is ever lost. Memory index auto-loaded on every session start.
+**Plan-execute split.** Every role follows the same cycle: plan mode, write a plan file, get user approval, context clears, execute mode. The execute phase has zero prior context — it only sees the plan file. This prevents context blowout on long sprints.
 
-### Inter-Session Inbox
-Roles communicate through `.sprint/inbox/` files. Status flow: UNREAD -> READ -> DONE -> delete. Messages have From/To headers. Async coordination without shared context windows.
+**Lite mode for simple tasks.** Not every worker needs the full ceremony. Lite mode gives workers a self-contained prompt with everything inline — no plan mode, no role doc reads. Saves ~45-55% tokens. The Coordinator picks Standard or Lite per worker.
 
-### Plan -> Execute Cycle
-Every role follows: plan mode -> plan file -> user approves -> context clears -> execute mode. Execute mode has ZERO prior context — the plan file is the only input. This prevents context blowout and ensures reproducibility.
+**Git worktrees for isolation.** Each worker gets its own worktree and branch. No merge conflicts during the sprint. The Coordinator merges one branch at a time afterward.
 
-### Lite Mode
-Two-mode system for workers: **Standard** (full ceremony, plan mode) and **Lite** (self-contained prompt, no plan mode, ~45-55% token savings). Coordinator selects per worker based on task complexity.
+**Templates for everything.** Plan templates, session prompts, session logs, worker reports, coordinator logs. Every artifact has a structure so nothing important gets skipped.
 
-### Context Intelligence
-Optional layer that maps your codebase dependencies and documentation domains. Helps the Coordinator write targeted worker prompts with exact file references, reducing worker exploration time by 40-60%.
-
-### Self-Improving Process
-Fix Tracker monitors harness improvements across sprints. Health Dashboard tracks metrics. Retrospectives feed learnings back into templates and role docs. The harness literally improves itself.
+Context Intelligence is also available — it maps your codebase dependencies to help the Coordinator write more targeted prompts. Optional. See the docs if you're curious.
 
 ---
 
@@ -170,28 +96,25 @@ Fix Tracker monitors harness improvements across sprints. Health Dashboard track
 
 ```
 your-project/
-├── CLAUDE.md                       # Master rules (auto-loaded every session)
-├── GETTING-STARTED.md              # Self-explaining guide for Claude Code
+├── CLAUDE.md                       # Master rules file (auto-loaded every session)
+├── GETTING-STARTED.md              # Guide that Claude Code reads on first setup
 ├── .sprint/
 │   ├── roles/
-│   │   ├── COORDINATOR-ROLE.md     # Full Coordinator protocol
-│   │   ├── WORKER-ROLE.md          # Full Worker protocol
-│   │   ├── AUDITOR-ROLE.md         # Full Auditor protocol
-│   │   └── ASSISTANT-ROLE.md       # Full Assistant protocol
-│   ├── inbox/
-│   │   ├── coordinator.md          # Coordinator's inbox
-│   │   ├── auditor.md              # Auditor's inbox
-│   │   └── workers.md              # Shared worker inbox
+│   │   ├── COORDINATOR-ROLE.md     # Coordinator protocol
+│   │   ├── WORKER-ROLE.md          # Worker protocol
+│   │   ├── AUDITOR-ROLE.md         # Auditor protocol
+│   │   └── ASSISTANT-ROLE.md       # Assistant protocol
+│   ├── inbox/                      # Inter-role messaging
 │   ├── context/                    # Context Intelligence (optional)
 │   └── sprint-1/                   # Sprint artifacts (created per sprint)
 ├── .claude/
-│   ├── templates/                  # 12 plan/artifact templates
-│   └── skills/                     # 8 custom skills
+│   ├── templates/                  # Plan and artifact templates
+│   └── skills/                     # Custom skills
 └── memory/
     ├── MEMORY.md                   # Memory index (auto-loaded)
-    ├── sprint-process.md           # Sprint learnings & patterns
+    ├── sprint-process.md           # Sprint learnings
     ├── user-decisions.md           # Decision register
-    └── {topic}.md                  # Topic-specific memory files
+    └── {topic}.md                  # Your project's topic files
 ```
 
 ---
@@ -203,43 +126,41 @@ your-project/
 | Your first sprint (step-by-step) | [`docs/tutorials/01-your-first-sprint.md`](docs/tutorials/01-your-first-sprint.md) |
 | Self-explaining guide (Claude reads this) | [`harness/GETTING-STARTED.md`](harness/GETTING-STARTED.md) |
 | Full changelog (v1 through v4.4) | [`CHANGELOG.md`](CHANGELOG.md) |
-| GitHub repo setup content | [`github-setup.md`](github-setup.md) |
-| Concepts: Roles | `docs/concepts/` *(coming soon)* |
-| Concepts: Memory Architecture | `docs/concepts/` *(coming soon)* |
-| Reference: Template Schema | `docs/reference/` *(coming soon)* |
-| Reference: Skill Authoring | `docs/reference/` *(coming soon)* |
 
 ---
 
-## Principles
+## Background
 
-This harness is opinionated. It was built on hard-won lessons:
+This harness was built over 19 sprints on [CityWijse](https://www.citywijse.com), an Amsterdam experiences platform. It started because multi-terminal Claude Code sessions kept hitting the same problems: workers committing on main instead of their branch, context windows blowing out mid-sprint, user decisions getting lost between sessions, and vague prompts leading to wasted worker cycles.
 
-- **Plans bypass the harness.** Never paste a plan directly into a worker terminal. Plans feed into SESSION-PROMPTs — that's the only activation path.
-- **One worker = one verb.** If a worker must read >2000 source lines, split the scope.
-- **Workers must commit.** Uncommitted work dies with the terminal.
-- **Decisions must be saved.** No user choice may exist only in conversation context.
-- **Process steps must be numbered tasks.** Anything outside the numbered task list gets lost in the plan->execute context clear.
-- **Measure, fix, validate.** Every harness change is tracked, measured after 2 sprints, and either verified or rolled back.
+Each version fixed something specific. v1 added roles and the inbox. v2 added memory and branch hooks. v3 got workers into worktrees. v4 made process steps indistinguishable from code tasks (which finally got compliance above 90%). Lite mode came in v4.1 to cut token costs for straightforward tasks.
+
+It's not perfect. Some sprints still need manual intervention, and the Auditor role is more useful on complex sprints than simple ones. But the core loop — plan, delegate, implement, merge — is stable and repeatable. The full history is in the [CHANGELOG](CHANGELOG.md).
+
+---
+
+## Things to know
+
+- **Plans go through SESSION-PROMPTs.** Don't paste a plan directly into a worker terminal. The Coordinator writes SESSION-PROMPTs — that's the only activation path for workers.
+- **One worker, one task.** If a worker would need to read more than ~2000 lines of source, split it into two workers.
+- **Workers must commit.** Uncommitted work dies when the terminal closes.
+- **Save decisions to files.** If a user says "use Stripe not Mollie," that goes in `memory/user-decisions.md`. Decisions that only exist in conversation context will be lost.
 
 ---
 
 ## FAQ
 
-**Q: Do I need multiple Claude Code subscriptions?**
-A: No. You open multiple Claude Code terminals (sessions) from the same installation. Each terminal is a separate context window.
+**Do I need multiple Claude Code subscriptions?**
+No. You open multiple terminals from the same installation. Each terminal is its own context window.
 
-**Q: Does this work with Claude Code Teams/Enterprise?**
-A: Yes. The harness is pure markdown — it works with any Claude Code setup.
+**How many workers should I run?**
+Start with 1–2. The harness has been tested with up to 5. More workers means more merge complexity, so only add them when you have genuinely parallel tasks.
 
-**Q: How many workers should I use?**
-A: Start with 1-2. The harness has been tested with up to 5. Use the optimal count, not the maximum — justify in your plan.
+**Can I skip the sprint ceremonies?**
+Yes. The Coordinator and Worker roles work for any structured task. The full sprint ceremony (contract, board, audit) is optional.
 
-**Q: Can I use this without sprints?**
-A: Yes. The Coordinator and Worker roles work for any structured task. The sprint ceremony (Contract, Board, Audit) is optional but recommended.
-
-**Q: What if I only want the memory system?**
-A: You can use `memory/MEMORY.md` and topic files standalone. The memory architecture doesn't depend on the role system.
+**Does this work with Cursor or Windsurf?**
+No. It's built for Claude Code specifically — the roles, skills, and plan-execute cycle depend on how Claude Code handles `CLAUDE.md` and context windows.
 
 ---
 
@@ -258,4 +179,4 @@ Free to use, modify, and learn from. Cannot be sold, sublicensed, or claimed as 
 
 ---
 
-*Built by [OpusPocusAI](https://github.com/OpusPocusAI) — battle-tested over 19 production sprints.*
+Built by [OpusPocusAI](https://github.com/OpusPocusAI).

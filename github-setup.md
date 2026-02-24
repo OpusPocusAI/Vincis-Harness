@@ -8,13 +8,13 @@
 ## Repo Description (1-liner for the "About" section)
 
 ```
-A battle-tested multi-terminal sprint harness for Claude Code. Roles, memory, inbox, sprint cycles — everything you need to ship faster with AI.
+Multi-terminal coordination for Claude Code — roles, memory, inbox, and sprint cycles through markdown files.
 ```
 
 ## About Section — Full Text
 
 ```
-Vinci's CC-Harness is an open-source framework that transforms Claude Code into a coordinated multi-agent development system. Born from 19+ production sprints, it provides roles (Coordinator, Worker, Auditor, Assistant), persistent memory, inter-session messaging, sprint lifecycle management, and Context Intelligence — all configured through markdown files that Claude Code reads automatically.
+Vinci's CC-Harness gives Claude Code structured roles, persistent memory, and sprint lifecycle management. Open multiple terminals, assign roles, and they coordinate through markdown files. No plugins, no infrastructure. Built over 19 sprints on a real product.
 ```
 
 ## Topics / Tags
@@ -39,7 +39,6 @@ claude-code, ai-development, multi-agent, sprint-management, developer-tools, cl
 ![Version](https://img.shields.io/badge/version-4.4-blue)
 ![License](https://img.shields.io/badge/license-Custom%20(Free%20Use)-green)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-blueviolet)
-![Sprints](https://img.shields.io/badge/battle--tested-19%2B%20sprints-orange)
 ```
 
 ## Repository Settings
@@ -57,5 +56,5 @@ claude-code, ai-development, multi-agent, sprint-management, developer-tools, cl
 ```
 v1.0.0 — Initial public release
 
-The battle-tested multi-terminal sprint harness for Claude Code, extracted from 19+ production sprints. Includes 4 roles, 12 plan templates, 8 skills, persistent memory architecture, inter-session inbox, and Context Intelligence.
+Multi-terminal sprint harness for Claude Code. 4 roles, plan templates, skills, persistent memory, inter-session inbox, and Lite mode for token-efficient workers. Extracted from 19 production sprints.
 ```
