@@ -7,7 +7,7 @@
 Multi-terminal coordination for Claude Code. You open several terminals, assign each one a role, and they coordinate through markdown files. No plugins, no server, no infrastructure — just files that Claude Code reads on startup.
 
 <p align="center">
-  <img src="docs/assets/terminal-layout.png" alt="Four terminals running different harness roles" width="720" />
+  <img src="docs/assets/terminal-layout.png" alt="Four terminals running different harness roles" width="480" />
   <br />
   <em>A typical sprint layout — Coordinator, two Workers, and an Auditor each in their own terminal.</em>
 </p>
