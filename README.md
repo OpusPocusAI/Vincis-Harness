@@ -168,7 +168,7 @@ your-project/
 
 ## Background
 
-I'm a vibe coder. Self-taught, no CS degree, can't write syntax from scratch. I understand the basics and use Claude Code for everything else. This harness is what happens when you push that approach through 19 production sprints on a real product — [CityWijse](https://www.citywijse.com), an Amsterdam experiences platform competing with GetYourGuide and Tripadvisor. Built entirely this way.
+I'm a vibe coder. Self-taught, no CS degree, can't write syntax from scratch. I understand the basics and use Claude Code for everything else. This harness is what happens when you push that approach through 19 production sprints on a real product — [CityWijse](https://www.citywijse.com), an Amsterdam travel concierge.
 
 The first sprint was chaos. All workers committed on main. Process compliance sat at ~20%. Context blew out every other session. A worker once picked the wrong payment provider because a user decision from 3 sessions ago wasn't saved anywhere.
 
