@@ -1,0 +1,41 @@
+Vinci's CC-Harness License
+
+Copyright (c) 2026 OpusPocusAI. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, and create derivative works of the Software for personal,
+educational, or internal business purposes, subject to the following conditions:
+
+1. ATTRIBUTION: The above copyright notice and this permission notice shall be
+   included in all copies or substantial portions of the Software. Any derivative
+   work must clearly credit OpusPocusAI as the original author.
+
+2. NO COMMERCIAL REDISTRIBUTION: You may NOT sell, sublicense, rent, lease, or
+   otherwise commercially distribute the Software or any derivative works. This
+   includes but is not limited to:
+   - Selling the Software as a standalone product
+   - Including the Software as part of a paid product or service
+   - Offering the Software as a paid SaaS, API, or hosted service
+   - Relicensing the Software under a more permissive license
+
+3. NO CLAIMING OWNERSHIP: You may NOT represent yourself as the original author
+   or claim ownership of the Software. Derivative works must be clearly identified
+   as modifications and must not remove or obscure the original attribution.
+
+4. FREE USE: You are free to use the Software in your own projects (commercial or
+   otherwise) without charge. The restriction is on selling or redistributing the
+   harness itself, not on using it to build your own products.
+
+5. CONTRIBUTIONS: By submitting contributions to this project, you agree that your
+   contributions are licensed under the same terms as this license and that
+   OpusPocusAI retains the right to relicense the project (including your
+   contributions) at any time.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
