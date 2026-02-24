@@ -39,6 +39,7 @@ claude-code, ai-development, multi-agent, sprint-management, developer-tools, cl
 ![Version](https://img.shields.io/badge/version-4.4-blue)
 ![License](https://img.shields.io/badge/license-Custom%20(Free%20Use)-green)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-blueviolet)
+![Sprints](https://img.shields.io/badge/sprints-19%2B-orange)
 ```
 
 ## Repository Settings
