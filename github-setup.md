@@ -8,38 +8,39 @@
 ## Repo Description (1-liner for the "About" section)
 
 ```
-Multi-terminal coordination for Claude Code — roles, memory, inbox, and sprint cycles through markdown files.
+AI coding harness — memory, guardrails, and advisory council for any model. Works with Kimi, Claude, GPT, Cursor, and more.
 ```
 
 ## About Section — Full Text
 
 ```
-Vinci's CC-Harness gives Claude Code structured roles, persistent memory, and sprint lifecycle management. Open multiple terminals, assign roles, and they coordinate through markdown files. No plugins, no infrastructure. Built over 19 sprints on a real product.
+Vinci's Harness gives your AI coding assistant memory, 39 guardrail hooks, and an advisory council system. Model-agnostic — works with Kimi 2.5, Claude Code, GPT, Cursor, or any AI tool. Built over 64+ production sprints. Includes beginner guide, implementation manual for AI assistants, and complete hook infrastructure.
 ```
 
 ## Topics / Tags
 
 ```
-claude-code, ai-development, multi-agent, sprint-management, developer-tools, claude, anthropic, ai-workflow, code-automation, productivity
+ai-coding, ai-development, developer-tools, ai-workflow, code-automation, productivity, kimi, claude-code, cursor, multi-agent, memory-system, guardrails, model-agnostic, vibe-coding, unreal-engine
 ```
 
 ## Social Preview Image Description
 
 > Create a 1280x640px image with:
-> - Dark background (charcoal or deep navy)
-> - "Vinci's CC-Harness" in large, clean sans-serif font (white or gold)
-> - Subtitle: "Multi-terminal sprint system for Claude Code"
-> - Small role icons or terminal illustrations (4 terminals arranged in a grid)
+> - Dark background (deep charcoal gradient)
+> - "Vinci's Harness" in large, clean sans-serif font (white or gold)
+> - Subtitle: "AI Coding Framework — Any Model, Any Project"
+> - Three icons representing: Memory (brain), Guardrails (shield), Council (three people)
+> - "v10.7 | 39 hooks | model-agnostic" in smaller text
 > - OpusPocusAI logo or wordmark in bottom-right
-> - Subtle grid or circuit pattern in background
+> - Subtle grid pattern in background
 
 ## Suggested Badges (for README.md header)
 
 ```markdown
-![Version](https://img.shields.io/badge/version-4.4-blue)
+![Version](https://img.shields.io/badge/version-10.7-blue)
 ![License](https://img.shields.io/badge/license-Custom%20(Free%20Use)-green)
-![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-blueviolet)
-![Sprints](https://img.shields.io/badge/sprints-19%2B-orange)
+![Model Agnostic](https://img.shields.io/badge/model-agnostic-blueviolet)
+![Hooks](https://img.shields.io/badge/hooks-39-orange)
 ```
 
 ## Repository Settings
@@ -49,13 +50,16 @@ claude-code, ai-development, multi-agent, sprint-management, developer-tools, cl
 - **Wiki**: Disabled (docs are in the repo)
 - **Issues**: Enabled
 - **Discussions**: Enabled (for community questions)
-- **Packages**: Disabled (npm publishing comes later)
-- **Environments**: None needed initially
+- **Packages**: Disabled
+- **Environments**: None needed
 
-## Release Tag (for v1.0.0)
+## Release Tag (for v10.7.0)
 
 ```
-v1.0.0 — Initial public release
+v10.7.0 — Model-Agnostic Harness with Full Infrastructure
 
-Multi-terminal sprint harness for Claude Code. 4 roles, plan templates, skills, persistent memory, inter-session inbox, and Lite mode for token-efficient workers. Extracted from 19 production sprints.
+Complete rewrite: 39 guardrail hooks, 7 commands, 6 skills, advisory council,
+token tracking, Discord integration. Works with any AI coding tool (Kimi 2.5,
+Claude, GPT, Cursor). Includes Agentic Coding 101 beginner guide and AI-facing
+implementation manual. Built over 64+ production sprints.
 ```

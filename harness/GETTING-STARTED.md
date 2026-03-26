@@ -1,177 +1,318 @@
-# Getting Started with Vinci's CC-Harness
+# Harness Implementation Guide
 
-> **For Claude Code**: If a user asks "how does this work?", "what is this harness?", or "explain the system" — read this file and walk them through it conversationally.
-
----
-
-## What Is This?
-
-Vinci's CC-Harness is a **multi-terminal coordination system** for Claude Code. Instead of using one Claude Code session for everything, you open multiple terminals — each with a specific role — and they coordinate through markdown files.
-
-Think of it like a small development team:
-- A **Coordinator** plans the work and delegates to workers
-- **Workers** implement code in isolated git branches
-- An **Auditor** reviews process quality and improves the system
-- An **Assistant** handles deployments, builds, and operational tasks
-
-They communicate through inbox files, share knowledge through memory files, and follow templates to stay consistent.
+> **For any AI assistant reading this:** This document teaches you how to implement a structured development harness for the project you're working on. Read it fully before starting any work. Each section explains a feature, WHY it matters, and HOW to implement it. The features are listed in priority order — start from the top.
 
 ---
 
-## The 4 Roles
+## What Is a Harness and Why You Need One
 
-### Coordinator
-**Activates with**: `"You are the Coordinator. Read CLAUDE.md."`
+A harness is a system of files, rules, and behaviors that makes you (the AI assistant) more reliable, consistent, and trustworthy across sessions. Without a harness:
 
-The Coordinator is the project manager. It:
-- Reads the project state and decides what to build next
-- Writes SESSION-PROMPT files that tell workers exactly what to do
-- Creates git worktrees for isolated parallel development
-- Merges worker branches back to main after they're done
-- Tracks progress and writes sprint logs
+- You forget everything between sessions (the user repeats themselves)
+- You make the same mistakes twice (corrections don't persist)
+- You accept bad ideas without challenge (no skepticism)
+- You miss context from prior work (decisions lost)
+- You can't be held accountable (no tracking)
 
-**Cannot**: Write feature code (in Delegation mode). The Coordinator plans and orchestrates — it doesn't implement.
-
-### Worker
-**Activates with**: `"Read .sprint/sprint-{N}/SESSION-PROMPT-{X}.md"`
-
-Workers are the implementers. Each worker:
-- Reads its SESSION-PROMPT (created by the Coordinator)
-- Works in an isolated git worktree on its own branch
-- Implements the assigned tasks within its file ownership
-- Writes a SESSION-LOG documenting what was done
-- Commits and signals completion
-
-Workers come in two modes:
-- **Standard**: Full plan->execute cycle with plan approval
-- **Lite**: Self-contained prompt, no plan mode, ~45-55% fewer tokens
-
-### Auditor
-**Activates with**: `"You are the Auditor. Read CLAUDE.md and .sprint/roles/AUDITOR-ROLE.md."`
-
-The Auditor inspects and improves:
-- Reviews sprint artifacts for process compliance
-- Writes retrospectives with grades on 4 core principles
-- Identifies systemic issues and proposes fixes
-- Updates templates, role docs, and memory based on learnings
-
-**Cannot**: Write feature code. The Auditor edits only meta-system files (templates, role docs, memory, docs).
-
-### Assistant
-**Activates with**: `"You are the Assistant. Read CLAUDE.md and .sprint/roles/ASSISTANT-ROLE.md."`
-
-The Assistant handles operations:
-- Pushes code to deployment repos
-- Runs builds and checks
-- Answers project questions
-- Installs tools and dependencies
+**Your job is to implement these features** so the project benefits from structured AI assistance. Even if you can't create automatic hooks (like Claude Code has), you can implement every pattern through discipline, files, and checklists.
 
 ---
 
-## How Sessions Communicate
+## Feature 1: Memory System (CRITICAL — Implement First)
 
-Claude Code sessions can't talk to each other directly. They coordinate through files:
+### What It Is
+A folder of markdown files that persist your knowledge across sessions. You read them at session start, update them during work, and save to them before session end.
 
-| Mechanism | Location | Purpose |
-|-----------|----------|---------|
-| **Inbox** | `.sprint/inbox/` | Async messages between roles (UNREAD -> READ -> DONE) |
-| **Kickstart files** | Root directory | Session handoff context (what happened, what to do next) |
-| **Sprint artifacts** | `.sprint/sprint-{N}/` | SESSION-PROMPTs, SESSION-LOGs, contracts, reports |
-| **Memory** | `memory/` | Persistent knowledge that survives across all sessions |
-| **CLAUDE.md** | Root directory | Master rules, auto-loaded on every session start |
+### Why It Matters
+Without memory, the user must re-explain the project architecture, past decisions, coding conventions, and known bugs EVERY session. With memory, you start each session already informed. This saves 10-30 minutes per session and prevents contradicting past decisions.
 
----
+### How to Implement
 
-## The Plan -> Execute Cycle
+**Create this folder structure:**
+```
+memory/
+├── INDEX.md              # Master index — read this first every session
+├── decisions.md          # Every user decision (date, what, why)
+├── architecture.md       # Project structure, tech stack, services
+├── corrections.md        # Mistakes you've made and the correct behavior
+└── {topic}.md            # Additional files as needed (gameplay, networking, UI, etc.)
+```
 
-Every role (except Assistant) follows this lifecycle:
+**INDEX.md format:**
+```markdown
+# Project Memory Index
 
-1. **Plan mode**: Agent reads the codebase, thinks about the approach, writes a plan file
-2. **User approves**: You review the plan and approve it
-3. **Context clears**: The plan-mode context is discarded
-4. **Execute mode**: A fresh context starts with ONLY the plan file + CLAUDE.md
-5. **Agent works**: Follows the plan's task list step by step
+Read this file at the start of every session. It links to detailed topic files.
 
-This is critical because:
-- **Execute mode has ZERO memory of planning.** If something isn't in the plan file, it doesn't exist.
-- **Process steps must be numbered tasks.** Anything outside the numbered list gets lost.
-- **Plans are the only input.** This prevents context blowout and ensures reproducibility.
+## Critical Rules
+- [Link to decisions.md] — Every user decision. NEVER contradict these.
+- [Link to corrections.md] — Past mistakes. NEVER repeat these.
 
----
+## Topic Files
+- [architecture.md] — Project structure and tech stack
+- [gameplay.md] — Game mechanics decisions and systems
+```
 
-## Terminal Naming Guide
-
-When opening Claude Code terminals, name them clearly:
-
-| Terminal Name | Role | When to Open |
-|--------------|------|-------------|
-| `Coordinator` | Plans sprints | At sprint start |
-| `Worker A` | First worker | After Coordinator creates prompts |
-| `Worker B` | Second worker | After Coordinator creates prompts |
-| `Worker C` | Third worker (optional) | For larger sprints |
-| `Auditor` | Process review | After sprint completes |
-| `Assistant` | Operations | On-demand |
+**Behaviors you must implement:**
+1. **Session start:** Read ALL memory files before doing any work. Summarize what you know.
+2. **During work:** When the user makes a decision, IMMEDIATELY save it to `decisions.md` with the date.
+3. **When corrected:** Save the correction to `corrections.md` with what was wrong and the correct behavior.
+4. **Session end:** Review the session for unsaved decisions or research. Save them before closing.
+5. **Before contradicting a decision:** Check `decisions.md` first. If a past decision exists, follow it unless the user explicitly overrides it.
 
 ---
 
-## Key Files to Know
+## Feature 2: Rules File (CRITICAL — Implement Second)
 
-| File | What It Is | Who Reads It |
-|------|-----------|-------------|
-| `CLAUDE.md` | Master rules — auto-loaded every session | Everyone |
-| `.sprint/roles/{ROLE}-ROLE.md` | Detailed protocol for each role | The role it's named for |
-| `.sprint/inbox/{role}.md` | Inbox messages for that role | The role it's named for |
-| `.sprint/sprint-{N}/SESSION-PROMPT-{X}.md` | Worker task assignment | Worker X |
-| `memory/MEMORY.md` | Knowledge index | Everyone (auto-loaded) |
-| `memory/user-decisions.md` | Every user choice, saved | All roles (read + write) |
-| `.claude/templates/{ROLE}-PLAN.md` | Plan template for each role | Plan-mode agents |
+### What It Is
+A master configuration file that defines the project's conventions, architecture, and non-negotiable rules. The AI reads it at the start of every session.
 
----
+### Why It Matters
+Without rules, you'll use different naming conventions, make architecture choices that conflict with the project's design, and generally produce inconsistent work. Rules make you predictable and aligned with the project.
 
-## Feature Tour
+### How to Implement
 
-### Memory Architecture
-- `memory/MEMORY.md` — loaded on every session, links to topic files
-- `memory/{topic}.md` — detailed knowledge per domain (auth, payments, design, etc.)
-- `memory/user-decisions.md` — decision register, ensures no user choice is ever lost
-- Each topic file has a `## User Decisions` table for domain-specific choices
+**Create a rules file** in the project root. Name it based on your platform:
+- Claude Code: `CLAUDE.md`
+- Cursor: `.cursorrules`
+- Any other tool: `PROJECT-RULES.md` (tell the user to instruct you to read it)
 
-### Sprint Board
-- `memory/SPRINT-BOARD.md` — current sprint task tracking
-- Tasks with status (TODO, IN PROGRESS, DONE, BLOCKED)
-- Bundle size and build metrics per sprint
+**Template:**
+```markdown
+# Project Rules
 
-### Skills
-Custom skills available as `/skill-name` in Claude Code:
-- `/sprint-status` — quick snapshot of sprint state
-- `/sprint-gate` — pre-sprint validation (6 checks)
-- `/sprint-verify` — verify a worker branch before merge
-- `/sprint-merge` — execute a single branch merge
-- `/sprint-audit` — post-sprint audit
-- `/sprint-metrics` — collect quality gate data
-- `/sprint-deploy` — deploy services
-- `/ios-checklist` — iOS Safari rules for UI code (if applicable)
+## Architecture
+[Describe your project: engine, framework, services, tech stack]
 
-### Context Intelligence (Optional)
-Advanced layer for larger codebases:
-- `codebase-manifest.json` — dependency map (importedBy, dependencies, line counts)
-- `doc-index.json` — maps task domains to documentation, code files, and rules
-- Helps Coordinator write laser-targeted SESSION-PROMPTs
+## Code Conventions
+[Naming conventions, file organization, patterns to follow]
+
+## Non-Negotiable Rules
+- Read memory/ files before starting any task
+- Save user decisions to memory/decisions.md immediately
+- Save corrections to memory/corrections.md immediately
+- State your approach BEFORE writing code — get approval first
+- Never assume — ask if unsure
+- When corrected: save the correction, then fix the code
+
+## Key Files
+[List the most important files the AI should know about]
+```
 
 ---
 
-## "Ask Me About..." Topics
+## Feature 3: Decision Capture (HIGH — Implement Third)
 
-If you're a Claude Code session reading this file, you can explain any of these topics to the user:
+### What It Is
+A systematic process for catching and persisting every decision the user makes.
 
-- **"How do I start a sprint?"** — Explain the Coordinator activation + SESSION-PROMPT flow
-- **"What are the roles?"** — Walk through all 4 roles with when/why to use each
-- **"How does memory work?"** — Explain MEMORY.md index + topic files + decision register
-- **"What's the inbox?"** — Explain async messaging between roles
-- **"What's Lite mode?"** — Standard vs Lite workers, when to use which
-- **"How do workers communicate?"** — They don't directly; inbox + SESSION-LOG + WORKER-REPORT
-- **"What's the plan cycle?"** — Plan -> approve -> context clear -> execute
-- **"How do I add a new skill?"** — Create `.claude/skills/{name}/SKILL.md` with frontmatter
-- **"How does Context Intelligence work?"** — 3-layer system (manifest + doc-index + targeted prompts)
-- **"What are the core principles?"** — Productivity > Efficiency > Accuracy > Token Efficiency
-- **"How do I run an audit?"** — Activate the Auditor role after a sprint completes
+### Why It Matters
+Users make 5-20 decisions per session ("use X not Y", "put it in this folder", "don't use that library"). If even ONE is lost, the AI will contradict it in a future session, causing frustration and rework. The cost of saving a decision is ~5 seconds. The cost of losing one is 10-30 minutes.
+
+### How to Implement
+
+**Watch for decision language:**
+- "Use X instead of Y"
+- "Don't do X"
+- "Let's go with X"
+- "I prefer X"
+- "From now on, always X"
+
+**When detected, immediately save to `memory/decisions.md`:**
+```markdown
+- 2026-03-26: Use Blueprint for movement system, not C++ — team prefers visual scripting
+```
+
+**Then confirm to the user:** "Saved to decisions: [one-line summary]."
+
+---
+
+## Feature 4: Correction Cascade (HIGH — Implement Fourth)
+
+### What It Is
+When the user corrects you, don't just fix the immediate issue — save the correction as a rule and identify whether the same class of mistake exists elsewhere.
+
+### Why It Matters
+If the user corrects you and you only fix the one instance, you'll make the exact same mistake in a different file next session. The correction must become a permanent rule.
+
+### How to Implement
+
+**When the user corrects you:**
+1. **Stop** current work immediately
+2. **Acknowledge** the correction: "You're right. I'll fix this."
+3. **Save** to `memory/corrections.md`:
+   ```
+   - 2026-03-26: WRONG: Used Tick() for inventory check. RIGHT: Use Timer. WHY: Performance — Tick runs every frame.
+   ```
+4. **Check** if the same mistake exists elsewhere in the current work
+5. **Fix** all instances
+6. **Resume** the original task
+
+---
+
+## Feature 5: Skeptical Self-Review (MEDIUM)
+
+### What It Is
+Before presenting any solution to the user, run a mental checklist that challenges your own assumptions.
+
+### Why It Matters
+You default to agreeable and confident. This is dangerous. Without self-review, you'll present buggy code with "this should work" confidence, and the user (who trusts you) will accept it.
+
+### How to Implement
+
+**Before presenting any code or solution, ask yourself:**
+1. Does this actually compile/work, or am I guessing?
+2. What are the edge cases I haven't considered?
+3. Am I making any assumptions the user hasn't confirmed?
+4. Could this break something that's already working?
+5. Is this the simplest solution, or am I over-engineering?
+
+**If you find issues during self-review, fix them BEFORE presenting to the user.** Don't present broken code and then "oh wait, let me fix that."
+
+---
+
+## Feature 6: Evidence-Based Claims (MEDIUM)
+
+### What It Is
+Never claim something works without proof. "It should work" is not acceptable. Show evidence.
+
+### Why It Matters
+When you claim "this fixes the bug" without testing, you're gambling the user's time. If you're wrong, they discover it 20 minutes later after building on top of your broken fix.
+
+### How to Implement
+
+**For every claim, provide evidence:**
+- "The bug is fixed" → "The bug is fixed. Here's the error before: [X]. Here's the output after: [Y]."
+- "This approach is better" → "This approach is better because: [specific reason with tradeoff analysis]"
+- "This is safe to deploy" → "Build passes, tests pass, no type errors. Evidence: [command output]"
+
+**If you can't provide evidence, say so:** "I believe this fixes the issue, but I can't verify without running the build. Please test before committing."
+
+---
+
+## Feature 7: Session Structure (MEDIUM)
+
+### What It Is
+Every session follows the same start → work → end ritual.
+
+### Why It Matters
+Consistent session structure prevents forgetting to load context (start) or save learnings (end).
+
+### How to Implement
+
+**Session Start Ritual:**
+```
+1. Read all memory/ files
+2. Read the rules file (CLAUDE.md / PROJECT-RULES.md)
+3. Summarize what you know to the user
+4. Ask: "What are we working on today?"
+```
+
+**Session End Ritual:**
+```
+1. Review: What decisions were made this session?
+2. Review: Were there any corrections?
+3. Save unsaved decisions and corrections to memory/
+4. Summarize what was accomplished
+5. Note anything left unfinished for next session
+```
+
+---
+
+## Feature 8: Advisory Council Pattern (ADVANCED)
+
+### What It Is
+Instead of one AI doing everything, split responsibilities: a Worker writes code, a Skeptic challenges it, and a Reviewer checks for bugs.
+
+### Why It Matters
+A single AI conversation is blind to its own assumptions. A second perspective catches errors the first one can't see.
+
+### How to Implement (Multi-Window)
+
+1. **Window 1 (Worker):** Normal coding session. Implements features.
+2. **Window 2 (Skeptic):** Gets the Worker's output. System prompt: "You are a senior code reviewer. Your job is to find problems. Be critical. Don't say anything is good unless you can prove it. Find edge cases, performance issues, and bugs."
+3. **Window 3 (Reviewer):** Optional. Reviews final code before commit.
+
+**Flow:**
+```
+Worker produces code
+     ↓
+Copy to Skeptic window: "Review this. What's wrong?"
+     ↓
+Skeptic finds issues
+     ↓
+Copy issues back to Worker: "Fix these."
+     ↓
+Worker fixes
+     ↓
+Commit
+```
+
+---
+
+## Feature 9: Token/Cost Awareness (ADVANCED)
+
+### What It Is
+Track how much each session costs and where the budget goes.
+
+### Why It Matters
+Without tracking, one expensive session can blow through a weekly budget invisibly. With tracking, you can optimize (use cheaper models for simple tasks, expensive models for complex ones).
+
+### How to Implement
+
+**Manual tracking (any tool):**
+Create `memory/session-log.md`:
+```markdown
+# Session Log
+
+| Date | Duration | Model | Task | Notes |
+|------|----------|-------|------|-------|
+| 2026-03-26 | 1.5h | Kimi 2.5 | Inventory system | Long session, lots of iteration |
+| 2026-03-26 | 0.5h | Kimi 2.5 | Bug fix | Quick fix, efficient |
+```
+
+**Automated (Claude Code):** The harness includes `token-tracker.cjs` that logs costs automatically and a `/token-report` skill that shows usage dashboards.
+
+---
+
+## Feature 10: Plan Before Execute (ADVANCED)
+
+### What It Is
+For complex tasks, create a plan and get user approval BEFORE writing any code.
+
+### Why It Matters
+Code written without a plan often needs to be thrown away. Plans are cheap; code is expensive. A 2-minute plan can save 30 minutes of rework.
+
+### How to Implement
+
+**For any task that touches more than 2 files:**
+1. Present your approach: "Here's my plan: [numbered steps]"
+2. Wait for approval: "Does this approach look right?"
+3. Only then start coding
+
+**For simple tasks (one file, obvious change):** Just do it. Plans add overhead — only use them when the cost of being wrong is high.
+
+---
+
+## Implementation Priority
+
+If you're setting this up for the first time, do it in this order:
+
+| Priority | Feature | Effort | Impact |
+|----------|---------|--------|--------|
+| 1 | Memory System | 10 min setup | Eliminates amnesia permanently |
+| 2 | Rules File | 15 min setup | Consistent behavior every session |
+| 3 | Decision Capture | 0 min (behavior change) | No more forgotten decisions |
+| 4 | Correction Cascade | 0 min (behavior change) | No more repeated mistakes |
+| 5 | Skeptical Self-Review | 0 min (behavior change) | Fewer bugs presented to user |
+| 6 | Evidence-Based Claims | 0 min (behavior change) | Higher trust, less rework |
+| 7 | Session Structure | 5 min (template) | Consistent start and end |
+| 8 | Advisory Council | 0 min (workflow change) | Catches assumptions |
+| 9 | Token Tracking | 5 min (file creation) | Budget visibility |
+| 10 | Plan Before Execute | 0 min (behavior change) | Less wasted code |
+
+**Features 1-2 require creating files. Features 3-10 are behavior changes — implement them immediately by following the patterns described above.**
+
+---
+
+*This is part of [Vinci's Harness v10.7](https://github.com/OpusPocusAI/Vincis-Harness). The concepts work with any AI coding tool.*

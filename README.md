@@ -1,158 +1,217 @@
-![Version](https://img.shields.io/badge/version-4.4-blue)
+![Version](https://img.shields.io/badge/version-10.7-blue)
 ![License](https://img.shields.io/badge/license-Custom%20(Free%20Use)-green)
-![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-blueviolet)
-![Sprints](https://img.shields.io/badge/sprints-19%2B-orange)
+![Model Agnostic](https://img.shields.io/badge/model-agnostic-blueviolet)
+![Hooks](https://img.shields.io/badge/hooks-39-orange)
 
-# Vinci's CC-Harness
+# Vinci's Harness
 
-Multi-terminal sprint system for Claude Code. Each terminal gets a role — Coordinator, Worker, Auditor, or Assistant — and they coordinate through markdown files. No plugins, no servers, no shared context windows.
+**A framework for working with AI coding assistants — any model, any project.**
+
+Whether you use Claude Code, Kimi 2.5, Cursor, GPT, or anything else, this harness gives your AI assistant memory, guardrails, and structure so it doesn't forget what you told it, repeat mistakes, or go off the rails.
 
 <p align="center">
 
-![4 Roles](https://img.shields.io/badge/4_ROLES-7B42BC?style=for-the-badge)
-![Persistent Memory](https://img.shields.io/badge/PERSISTENT_MEMORY-2ea44f?style=for-the-badge)
-![Git Worktrees](https://img.shields.io/badge/GIT_WORKTREES-0969da?style=for-the-badge)
-![Plan Execute](https://img.shields.io/badge/PLAN_%E2%86%92_EXECUTE-CF5C00?style=for-the-badge)
-![Lite Mode](https://img.shields.io/badge/LITE_MODE-B8860B?style=for-the-badge)
-![File Inbox](https://img.shields.io/badge/FILE_INBOX-007A7A?style=for-the-badge)
+![Memory System](https://img.shields.io/badge/MEMORY_SYSTEM-2ea44f?style=for-the-badge)
+![39 Hooks](https://img.shields.io/badge/39_GUARDRAILS-7B42BC?style=for-the-badge)
+![Advisory Council](https://img.shields.io/badge/ADVISORY_COUNCIL-CF5C00?style=for-the-badge)
+![Token Tracking](https://img.shields.io/badge/TOKEN_TRACKING-0969da?style=for-the-badge)
+![Skills](https://img.shields.io/badge/6_SKILLS-B8860B?style=for-the-badge)
 
 </p>
 
-<table>
-<tr>
-<td align="center">
-<img src="docs/assets/terminal-layout.png" alt="Terminal layout: Coordinator, Workers A-E, Auditor, Assistant" />
-<br />
-<em>My setup</em>
-</td>
-<td>
-
-**Coordinator** at the top. **Workers A through E** — each on their own branch. **Auditor** and **Assistant** on standby. Every terminal is a separate Claude Code session. They don't share context windows — they share files.
-
-</td>
-</tr>
-</table>
+> **New to AI coding?** Start with [Agentic Coding 101](docs/guides/AGENTIC-CODING-101.md) — it explains what a harness is, why you need one, and the philosophy behind working with AI effectively. No prior experience required.
 
 ---
 
-## How It Works
+## The Problem This Solves
 
-The sprint loop:
+When you use an AI assistant to write code, you'll hit these problems within the first few sessions:
 
-1. Open a terminal. *"You are the Coordinator. Read CLAUDE.md."*
-2. Coordinator plans the sprint — what gets built, who builds it, what order.
-3. Coordinator writes a SESSION-PROMPT per worker. Scope, context, rules, acceptance criteria — everything the worker needs is in that one file.
-4. Open more terminals. One per worker. *"Read SESSION-PROMPT-A.md."*
-5. Workers implement in isolated git worktrees. One worker, one branch, no conflicts.
-6. Workers commit, write a report, done.
-7. Coordinator merges branches back to main — one at a time.
-8. Auditor reviews the sprint, writes a retro. Findings feed back into the harness.
+- **It forgets everything.** Every new session starts from zero. Decisions you made yesterday? Gone. That bug you fixed? It'll reintroduce it.
+- **It makes the same mistakes.** Without feedback loops, the AI has no way to learn from corrections. You'll repeat yourself constantly.
+- **It says "looks good" when it's not.** AI assistants are agreeable by default. Without skepticism built into the system, bad code slides through.
+- **You can't track what it costs.** Sessions burn through tokens with no visibility into where the budget goes.
+- **It goes off the rails.** One wrong assumption cascades into hours of wasted work because nothing caught it early.
 
-Everything flows through files in `.sprint/` and `memory/`.
+The harness fixes all of this with three layers:
+
+| Layer | What It Does | How |
+|-------|-------------|-----|
+| **Memory** | AI remembers decisions, research, and context across sessions | `memory/` folder with indexed topic files |
+| **Guardrails** | AI can't skip steps, ignore errors, or make dangerous changes | 39 hooks that fire automatically on specific events |
+| **Advisory Council** | Background agents that challenge assumptions and catch mistakes | 3 specialized agents that observe and nudge |
+
+---
+
+## What's Inside (v10.7)
 
 ```
-                     COORDINATOR
-                 plans · delegates · merges
-                          |
-         +-------+-------+-------+-------+
-         |       |       |       |       |
-      WORKER   WORKER  WORKER  WORKER  WORKER
-        A        B       C       D       E
-      branch   branch  branch  branch  branch
-         |       |       |       |       |
-         +-------+-------+-------+-------+
-                          |
-                       AUDITOR
-                   reviews · retros
-
-                      ASSISTANT
-                   deploys · answers
+your-project/
+├── .claude/
+│   ├── hooks/               # 39 guardrail scripts (auto-fire on events)
+│   │   ├── dangerous-command-guard.cjs    # Blocks rm -rf, force push, etc.
+│   │   ├── correction-cascade.cjs         # Turns corrections into permanent fixes
+│   │   ├── diagnosis-evidence-gate.cjs    # Demands proof before root cause claims
+│   │   ├── token-tracker.cjs              # Tracks session costs
+│   │   ├── discord-reporter.cjs           # Posts session summary to Discord
+│   │   └── ... (34 more)
+│   ├── commands/             # 7 slash commands
+│   │   ├── council.md        # /council — spawn advisory agents
+│   │   ├── dream.md          # /dream — consolidate memory
+│   │   └── ... (5 more)
+│   ├── skills/               # 6 reusable workflows
+│   │   ├── token-report/     # /token-report — usage dashboard
+│   │   ├── security-audit/   # /security-audit — vulnerability scan
+│   │   └── ... (4 more)
+│   ├── templates/            # Plan and artifact templates
+│   └── settings.json         # Hook orchestration config
+├── .sprint/
+│   ├── roles/                # Role protocols (Coordinator, Worker, Auditor, Assistant)
+│   └── inbox/                # Async messaging between roles
+├── memory/
+│   ├── MEMORY.md             # Index file (auto-loaded every session)
+│   ├── user-decisions.md     # Every decision you've made, saved forever
+│   └── {topic}.md            # Your project's knowledge files
+└── CLAUDE.md                 # Master rules (customize for your project)
 ```
-
-| Role | Does what | How many |
-|------|----------|----------|
-| **Coordinator** | Plans sprint, writes worker prompts, merges branches, tracks progress | 1 |
-| **Worker** | Implements code in an isolated git worktree. One task, one branch. | 1–5 |
-| **Auditor** | Reviews quality, writes retros, improves the harness | 1 (optional) |
-| **Assistant** | Deploys, pushes, runs builds, answers questions | 1 (on-demand) |
 
 ---
 
 ## Quick Start
 
-### 1. Install
+### 1. Clone and copy
 
 ```bash
 git clone https://github.com/OpusPocusAI/Vincis-Harness.git
-cp -r Vincis-Harness/harness/* your-project/
+cp -r Vincis-Harness/.claude/ your-project/.claude/
+cp -r Vincis-Harness/.sprint/ your-project/.sprint/
+cp -r Vincis-Harness/harness/memory/ your-project/memory/
 ```
 
-### 2. Configure
+### 2. Customize CLAUDE.md
 
-Edit `CLAUDE.md` in your project root — services, ports, deploy commands, code conventions. Claude Code reads this file on every session start.
+Copy the template CLAUDE.md to your project root and fill in:
+- Your project's architecture (services, ports, tech stack)
+- Your deployment process
+- Your code conventions
+- Your key files
 
-### 3. Run a sprint
+### 3. Start a session
 
 ```bash
-# Terminal 1 — Coordinator
-claude
-# "You are the Coordinator. Read CLAUDE.md."
+# Open your AI coding tool in the project directory
+claude  # or kimi, cursor, etc.
 
-# Terminal 2 — Worker A
-claude
-# "Read .sprint/sprint-1/SESSION-PROMPT-A.md"
-
-# Terminal 3 — Worker B (optional)
-claude
-# "Read .sprint/sprint-1/SESSION-PROMPT-B.md"
+# The AI reads CLAUDE.md automatically and knows your project's rules
 ```
 
-Full walkthrough → [Your First Sprint](docs/tutorials/01-your-first-sprint.md)
+### 4. Set up memory
+
+As you work, the harness automatically captures:
+- **Decisions** you make ("use PostgreSQL not MongoDB")
+- **Research** the AI does (API comparisons, architecture options)
+- **Corrections** you give ("don't use var, use const")
+
+These persist in `memory/` and are available in every future session.
 
 ---
 
-## What makes it work
+## The Three Layers Explained
 
-**Memory** — `memory/` files persist across sessions. Topic-based: payments, design, auth, whatever your project needs. A decision register (`user-decisions.md`) tracks every user choice — so the next sprint doesn't repeat a conversation about which payment provider to use.
+### Layer 1: Memory System
 
-**Inbox** — Roles message each other through `.sprint/inbox/`. UNREAD → READ → DONE → delete. Not real-time, but it works. Coordinator leaves instructions, workers flag blockers, Auditor drops review notes.
+Your AI forgets everything between sessions. Memory files fix this.
 
-**Plan → Execute** — Every role: plan mode → write plan → user approves → context clears → execute mode. Execute starts with zero memory of the planning conversation — the plan file is the only input. That's how you survive long sprints without context blowout.
+```
+memory/
+├── MEMORY.md              # Index — loaded every session, links to topic files
+├── user-decisions.md      # "Use Stripe not PayPal" — saved forever
+├── sprint-process.md      # How your team works, learnings from past sprints
+└── {your-topics}.md       # Whatever your project needs
+```
 
-**Lite mode** — Standard workers go through full ceremony: role doc, plan mode, templates. Lite workers get a self-contained prompt with everything inline. ~45–55% token savings. Coordinator picks Standard or Lite per worker based on task complexity.
+**How it works:**
+- `MEMORY.md` is auto-loaded into every session's context
+- Topic files contain detailed knowledge per domain
+- Decision register ensures no user choice is ever lost
+- Hooks automatically capture decisions and research into the right files
 
-**Git worktrees** — Each worker gets its own worktree and branch. `../worktree-a`, `../worktree-b`, etc. No merge conflicts during the sprint. Coordinator merges one at a time afterward.
+**Example:** You tell the AI "use Blueprint for the movement system, not C++." The `decision-capture-guard` hook catches this and saves it to `memory/user-decisions.md`. Next session, the AI knows — without you repeating it.
 
-**Templates** — Plan templates, session prompts, session logs, worker reports, coordinator logs. Every artifact has structure so nothing critical gets skipped in the plan → execute handoff.
+### Layer 2: Guardrails (39 Hooks)
 
-> Context Intelligence is available as an optional layer — maps codebase dependencies to help the Coordinator write more targeted prompts. See docs for details.
+Hooks are scripts that fire automatically when the AI does something. They can block, warn, or capture information.
+
+| Category | What They Do | Examples |
+|----------|-------------|---------|
+| **Safety** | Block dangerous operations | `dangerous-command-guard` blocks `rm -rf`, force push, `DROP TABLE` |
+| **Quality** | Enforce code standards | `quality-gate` runs type checks, `typecheck-on-edit` validates after every file change |
+| **Process** | Prevent skipped steps | `council-enforcer` blocks work until advisory council is spawned |
+| **Evidence** | Demand proof over guesses | `diagnosis-evidence-gate` requires evidence before claiming a root cause |
+| **Capture** | Auto-save important info | `decision-capture-guard` saves user decisions, `research-capture-guard` saves findings |
+| **Token** | Track spending | `token-tracker` logs costs per session, `complexity-estimator` advises which model to use |
+| **Context** | Survive long sessions | `post-compact-context-saver` preserves state when context compresses |
+
+**You don't need to configure these.** They're registered in `settings.json` and fire automatically. The AI doesn't even know they're there — it just can't do the bad things anymore.
+
+### Layer 3: Advisory Council
+
+Three background agents that watch the main AI and challenge it:
+
+| Agent | Role | When It Speaks |
+|-------|------|---------------|
+| **Evidence Auditor** | Challenges assumptions, demands proof | When the AI claims something without evidence |
+| **Behavior Watchdog** | Catches process violations | When the AI skips steps or declares done too early |
+| **Code Reviewer** | Reviews code changes for bugs | At natural breakpoints (commits, task completions) |
+
+The council is optional but powerful. It catches mistakes the main AI can't see because it's too deep in the work.
+
+**Activate with:** `/council` (in Claude Code) or spawn equivalent background agents in your tool.
 
 ---
 
-## What's Included
+## Adapting for Your Tool
 
-```
-your-project/
-├── CLAUDE.md                       # Master rules (auto-loaded every session)
-├── GETTING-STARTED.md              # Guide that Claude reads on first setup
-├── .sprint/
-│   ├── roles/
-│   │   ├── COORDINATOR-ROLE.md     # Coordinator protocol
-│   │   ├── WORKER-ROLE.md          # Worker protocol
-│   │   ├── AUDITOR-ROLE.md         # Auditor protocol
-│   │   └── ASSISTANT-ROLE.md       # Assistant protocol
-│   ├── inbox/                      # Inter-role messaging
-│   ├── context/                    # Context Intelligence (optional)
-│   └── sprint-1/                   # Sprint artifacts (per sprint)
-├── .claude/
-│   ├── templates/                  # Plan and artifact templates
-│   └── skills/                     # Custom skills
-└── memory/
-    ├── MEMORY.md                   # Memory index (auto-loaded)
-    ├── sprint-process.md           # Sprint learnings
-    ├── user-decisions.md           # Decision register
-    └── {topic}.md                  # Your project's topic files
-```
+This harness was born in Claude Code but the **philosophy is universal**. Here's how concepts map to other tools:
+
+| Harness Concept | Claude Code | Kimi 2.5 | Cursor / Windsurf | GPT |
+|----------------|-------------|----------|-------------------|-----|
+| **Memory files** | `memory/` folder, auto-loaded | Keep `memory/` folder, reference in system prompt | Same — reference in `.cursorrules` | Paste key decisions into system message |
+| **CLAUDE.md rules** | Auto-loaded every session | Copy rules into system prompt or project config | Use `.cursorrules` file | Paste into "Custom Instructions" |
+| **Hooks** | `.cjs` scripts fire automatically | Manual discipline (no hook system) — use checklists | Some support via extensions | Manual discipline |
+| **Council** | Background agents via `/council` | Open separate chat windows with advisor prompts | Multiple Cursor windows | Separate GPT conversations |
+| **Skills** | `/skill-name` slash commands | Copy skill content as prompts when needed | Command palette or snippets | Paste skill prompts manually |
+
+**Key insight:** Even without automatic hooks, you can follow the same principles manually. The philosophy matters more than the automation.
+
+---
+
+## Philosophy
+
+> Read [Agentic Coding 101](docs/guides/AGENTIC-CODING-101.md) for the full version.
+
+The harness is built on five principles:
+
+1. **Memory beats repetition.** Save every decision, every correction, every piece of research. Your AI should never make you repeat yourself.
+
+2. **Guardrails beat trust.** Don't trust the AI to remember rules. Enforce them automatically. A hook that blocks `rm -rf` is worth more than a rule that says "be careful."
+
+3. **Skepticism beats agreement.** The AI defaults to "good idea!" — that's dangerous. Build in agents or processes that challenge assumptions and demand proof.
+
+4. **Evidence beats intuition.** "It should work" is not evidence. "The tests pass" is evidence. "The build succeeds" is evidence. Demand proof at every step.
+
+5. **Structure beats talent.** A mediocre AI with good structure outperforms a brilliant AI with no structure. The harness IS the structure.
+
+---
+
+## What's New in v10.7
+
+- **Token monitoring v2** — sessions tracked via monotonic cost analysis, per-session cost breakdown
+- **Discord integration** — session summaries posted to your Discord channel automatically
+- **Model-adaptive statusbar** — accuracy estimates adjust based on model (different curves for different context window sizes)
+- **Burn rate projection** — "~2.5h of budget left" displayed in real-time
+- `/token-report` skill — instant usage dashboard
+- **Portability overhaul** — all 39 hooks genericized, zero project-specific references
 
 ---
 
@@ -160,56 +219,21 @@ your-project/
 
 | Topic | File |
 |-------|------|
+| **Start here (beginners)** | [`docs/guides/AGENTIC-CODING-101.md`](docs/guides/AGENTIC-CODING-101.md) |
+| Getting started (AI reads this) | [`harness/GETTING-STARTED.md`](harness/GETTING-STARTED.md) |
 | Your first sprint (step-by-step) | [`docs/tutorials/01-your-first-sprint.md`](docs/tutorials/01-your-first-sprint.md) |
-| Getting started (Claude reads this) | [`harness/GETTING-STARTED.md`](harness/GETTING-STARTED.md) |
-| Full changelog (v1 → v4.4) | [`CHANGELOG.md`](CHANGELOG.md) |
+| Full changelog | [`CHANGELOG.md`](CHANGELOG.md) |
+| Discord setup | `.claude/hooks/discord-reporter.cjs` (see inline docs) |
 
 ---
 
 ## Background
 
-I'm a vibe coder. Self-taught, no CS degree, can't write syntax from scratch. I understand the basics and use Claude Code for everything else. This harness is what happens when you push that approach through 19 production sprints on a real product — [CityWijse](https://www.citywijse.com), an Amsterdam travel concierge.
+Built by a vibe coder through 64+ production sprints on [CityWijse](https://www.citywijse.com), an Amsterdam travel platform. No CS degree — just AI and persistence.
 
-The first sprint was chaos. All workers committed on main. Process compliance sat at ~20%. Context blew out every other session. A worker once picked the wrong payment provider because a user decision from 3 sessions ago wasn't saved anywhere.
+The first sprint was chaos: 20% process compliance, context blowouts, forgotten decisions, workers on wrong branches. Each version fixed something. v1 added roles. v2 added memory. v4 got compliance to 90%. v8 shifted to coordinator-first. v10 added the council system, 39 hooks, and token tracking.
 
-Each version fixed something. v1 added roles and the inbox. v2 added memory and branch hooks. v3 got workers into worktrees — first time all workers landed on their correct branch. v4 made process steps part of the numbered task list, which got compliance from ~20% to ~90%. v4.1 added Lite mode for token savings.
-
-Not perfect. Complex merges still need manual intervention, and the Auditor is more useful on bigger sprints than small ones. But the core loop — plan, delegate, implement, merge — is stable and repeatable. If you understand what you want to build and can read what Claude writes back, you can run this.
-
----
-
-## Things to know
-
-- **Plans go through SESSION-PROMPTs.** Don't paste a plan directly into a worker terminal. The Coordinator writes SESSION-PROMPTs — that's the only valid activation path.
-- **One worker, one task.** If a worker would need to read more than ~2000 lines of source, split it into two workers.
-- **Workers must commit.** Uncommitted work dies with the terminal.
-- **Save decisions to files.** Any user decision ("use Stripe not Mollie") goes in `memory/user-decisions.md`. If it only exists in the conversation, it's already lost.
-
----
-
-## FAQ
-
-**Do I need multiple Claude Code subscriptions?**
-No. Multiple terminals from the same installation. Each terminal = separate context window.
-
-**How many workers should I run?**
-Start with 1–2. Tested with up to 5. More workers = more merge complexity — only add them when tasks are genuinely parallel.
-
-**Can I skip the sprint ceremonies?**
-Yes. Coordinator + Worker work for any structured task. Full ceremony (contract, board, audit) is optional.
-
-**Does this work with Cursor or Windsurf?**
-No. Built for Claude Code — the roles, skills, and plan-execute cycle depend on how Claude Code handles `CLAUDE.md` and context windows.
-
----
-
-## Contributing
-
-Contributions welcome.
-
-1. Open an issue describing the change
-2. Follow the existing markdown structure
-3. Test with at least one sprint cycle
+Now it's yours. The hooks, the memory system, the council — it all works regardless of which AI you use. If you can prompt an AI and read what it writes back, you can run this.
 
 ---
 

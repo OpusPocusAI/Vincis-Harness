@@ -1,8 +1,48 @@
 # Changelog
 
-All notable changes to Vinci's CC-Harness are documented in this file.
+All notable changes to Vinci's Harness are documented in this file.
 
-The harness version tracks structural changes to the coordination system — not application code. Each version was tested in live production sprints.
+The harness version tracks structural changes. Each version was battle-tested in production sprints on CityWijse (64+ sprints).
+
+---
+
+## v10.7.0 — 2026-03-26
+
+### Complete Rewrite: Model-Agnostic Harness with Full Infrastructure
+
+This is a ground-up overhaul. The harness is no longer Claude Code-only — it's a philosophy and toolset that works with **any AI coding assistant** (Kimi 2.5, Claude, GPT, Cursor, etc.).
+
+**New infrastructure (62 files added):**
+- **39 guardrail hooks** — auto-fire on events to block dangerous actions, enforce quality, capture decisions, and track costs
+- **7 slash commands** — /council (advisory agents), /dream (memory consolidation), /learn, /scout, /session-start, /commit-push-pr, /auditor-check
+- **6 skills** — /token-report (usage dashboard), /security-audit, /architecture-check, /ux-review, /harness-sync, /sprint-setup
+- **9 templates** — plans, retros, session prompts, sprint logs
+- **settings.json** — complete hook orchestration config
+
+**New documentation:**
+- **Agentic Coding 101** — beginner's guide to working with AI assistants properly. Covers the 5 principles, memory setup, advisory council pattern, tools of the trade. Written for humans who are brand new to structured AI coding.
+- **Implementation Guide** (GETTING-STARTED.md) — rewritten as an AI-facing guide. Any AI assistant reading this learns HOW to implement harness features (memory, decision capture, correction cascade, skeptical self-review, evidence-based claims, session structure, advisory council). Priority-ordered with effort/impact ratings.
+- **README.md** — complete rewrite with tool comparison table, three-layer explanation (Memory, Guardrails, Council), quick start guide, and philosophy section.
+
+**Key hooks explained:**
+| Hook | What It Does |
+|------|-------------|
+| dangerous-command-guard | Blocks rm -rf, force push, DROP TABLE |
+| correction-cascade | Turns every user correction into a permanent rule |
+| diagnosis-evidence-gate | Demands proof before accepting root cause claims |
+| decision-capture-guard | Auto-saves user decisions to memory files |
+| token-tracker | Tracks per-session costs with multi-session support |
+| discord-reporter | Posts session summary to Discord webhook |
+| council-enforcer | Blocks work until advisory council is spawned |
+| quality-gate | Runs type checks and code quality on session end |
+| complexity-estimator | Advises which model to use based on task complexity |
+
+**Philosophy: 5 Principles (tool-agnostic)**
+1. Memory beats repetition
+2. Guardrails beat trust
+3. Skepticism beats agreement
+4. Evidence beats intuition
+5. Structure beats talent
 
 ---
 
